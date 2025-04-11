@@ -17,12 +17,19 @@ type user struct {
 }
 
 func CreateUserHandler(queries *db.Queries, w http.ResponseWriter, r *http.Request) {
-        w.Header().Set("Content-Type", "application/json") // Add content-type header
-        var user user
+       var user user
         if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
                 http.Error(w, http.ErrBodyNotAllowed.Error(), 400)
                 return
         }
+	    userExists , _ := queries.CheckUserExists(context.Background(),user.Email)
+		
+	    if userExists {
+				http.Error(w, "User email already exists", http.StatusBadRequest)
+                return
+					}
+        w.Header().Set("Content-Type", "application/json") // Add content-type header
+       
         password, err := utils.HashPassword(user.Password)
         if err != nil {
                 println(err.Error())
@@ -35,7 +42,7 @@ func CreateUserHandler(queries *db.Queries, w http.ResponseWriter, r *http.Reque
                 Password: password,
         })
         if err != nil {
-                http.Error(w, "User email already exists", http.StatusBadRequest)
+                http.Error(w, "Please try again", http.StatusFailedDependency)
                 return
         }
         type data struct {

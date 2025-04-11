@@ -35,7 +35,7 @@ WHERE email = $1 LIMIT 1;
 SELECT EXISTS (
   SELECT 1
   FROM users
-  WHERE id = $1
+  WHERE email = $1
 );
 
 -- name: CountUsers :one

@@ -29,5 +29,8 @@ func NewRouter(queries *db.Queries) *http.ServeMux {
 	mux.HandleFunc("POST /users/login", func(w http.ResponseWriter, r *http.Request) {
 		handlers.LoginHandler(queries, w, r)
 	})
+
+	// TODO: Add a GET /users/login route to show the login form
+
 	return mux
 }

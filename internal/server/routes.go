@@ -26,5 +26,8 @@ func NewRouter(queries *db.Queries) *http.ServeMux {
 		handlers.GetUserByIDHandler(queries, w, r)
 	})
 	
+	mux.HandleFunc("POST /users/login", func(w http.ResponseWriter, r *http.Request) {
+		handlers.LoginHandler(queries, w, r)
+	})
 	return mux
 }

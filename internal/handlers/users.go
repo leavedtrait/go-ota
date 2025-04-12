@@ -192,30 +192,40 @@ func LoginHandler(queries *db.Queries, w http.ResponseWriter, r *http.Request) {
 
 	var req loginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		// http.Error(w, "Invalid request body", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid request body"})
 		return
 	}
 
 	user, err := queries.GetUserByEmail(context.Background(), req.Email)
 	if err != nil {
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		// http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid credentials"})
 		return
 	}
 
 	if !utils.CheckPasswordHash(req.Password, user.Password) { // Compare provided password with stored hash
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		// http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid credentials"})
 		return
 	}
 
 	token, err := utils.GenerateJWT(user.ID) // Assuming you have JWT generation utils
 	if err != nil {
-		http.Error(w, "Server error", http.StatusInternalServerError)
+		// http.Error(w, "Server error", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Server error"})
 		return
 	}
 
 	response, err := utils.CustomJsonResponse("Login successful", loginResponse{Token: token}, http.StatusOK)
 	if err != nil {
-		http.Error(w, "Server error", http.StatusInternalServerError)
+		// http.Error(w, "Server error", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Server error"})
 		return
 	}
 

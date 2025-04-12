@@ -34,14 +34,14 @@ func LoginPage(errMsg string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if errMsg != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"mb-4 text-sm text-red-600 bg-red-100 border border-red-400 p-2 rounded\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div id=\"error-box\" class=\"mb-4 text-sm text-red-600 bg-red-100 border border-red-400 p-2 rounded\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(errMsg)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `login.templ`, Line: 16, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/login.templ`, Line: 18, Col: 14}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -51,12 +51,17 @@ func LoginPage(errMsg string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div id=\"error-box\" class=\"hidden mb-4 text-sm text-red-600 bg-red-100 border border-red-400 p-2 rounded\"></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		templ_7745c5c3_Err = LoginForm().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -85,7 +90,7 @@ func LoginForm() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<form method=\"POST\" action=\"/users/login\" class=\"space-y-4\"><div><label for=\"email\" class=\"block text-sm font-medium text-gray-700\">Email</label> <input type=\"email\" id=\"email\" name=\"email\" required class=\"w-full px-3 py-2 mt-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400\"></div><div><label for=\"password\" class=\"block text-sm font-medium text-gray-700\">Password</label> <input type=\"password\" id=\"password\" name=\"password\" required class=\"w-full px-3 py-2 mt-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400\"></div><div><button type=\"submit\" class=\"w-full px-3 py-2 font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600\">Login</button></div></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<form id=\"login-form\" class=\"space-y-4\"><div><label for=\"email\" class=\"block text-sm font-medium text-gray-700\">Email</label> <input type=\"email\" id=\"email\" name=\"email\" required class=\"w-full px-3 py-2 mt-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400\"></div><div><label for=\"password\" class=\"block text-sm font-medium text-gray-700\">Password</label> <input type=\"password\" id=\"password\" name=\"password\" required class=\"w-full px-3 py-2 mt-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400\"></div><div><button type=\"submit\" id=\"login-button\" class=\"w-full px-3 py-2 font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600\"><span id=\"login-button-text\">Login</span> <svg id=\"login-spinner\" class=\"w-5 h-5 ml-2 animate-spin hidden text-white\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\"><circle class=\"opacity-25\" cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" stroke-width=\"4\"></circle> <path class=\"opacity-75\" fill=\"currentColor\" d=\"M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z\"></path></svg></button></div></form><script>\r\n    document.getElementById(\"login-form\").addEventListener(\"submit\", async function (e){\r\n        e.preventDefault();\r\n        const email = document.getElementById(\"email\").value;\r\n        const password = document.getElementById(\"password\").value;\r\n\r\n        const loginButton = document.getElementById(\"login-button\");\r\n        const loginButtonText = document.getElementById(\"login-button-text\");\r\n        const loginSpinner = document.getElementById(\"login-spinner\");\r\n        const errorBox = document.getElementById(\"error-box\");\r\n\r\n         // Show spinner, disable button\r\n        buttonText.textContent = \"Logging in...\";\r\n        spinner.classList.remove(\"hidden\");\r\n        loginButton.disabled = true;\r\n\r\n        const response = await fetch(\"/users/login\", {\r\n            method: \"POST\",\r\n            headers: {\r\n                \"Content-Type\": \"application/json\"\r\n            },\r\n            body: JSON.stringify({ email, password })\r\n        });\r\n\r\n        const result = await response.json();\r\n\r\n        // Hide spinner, re-enable button\r\n        buttonText.textContent = \"Login\";\r\n        spinner.classList.add(\"hidden\");\r\n        loginButton.disabled = false;\r\n        \r\n        if (response.ok){\r\n            window.location.href = \"/\";\r\n        }else{\r\n            if(errorBox){\r\n                errorBox.style.display = \"block\";\r\n                errorBox.textContent = result.error || \"Login failed.\";\r\n            }else{\r\n                alert(result.error || \"Login failed.\");\r\n            }\r\n        }\r\n    });\r\n\r\n    </script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

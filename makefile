@@ -9,8 +9,8 @@ info:
 	$(info )
 	$(info Available commands:)
 	$(info - build:  Build the Golang project.)
-	$(info - all:  Run all commands (GoBuild).)
-	$(info )
+	$(info - all:  Run all commands (Build ,run).)
+	$(info - templ-gen Run templ generate) 
 	$(info Usage: make <command>)
 
 # Build the Golang project

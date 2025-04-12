@@ -11,7 +11,7 @@ import (
 func NewRouter(queries *db.Queries) *http.ServeMux {
 	mux := http.DefaultServeMux
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-	  fmt.Fprintf(w, "Hello, World!")
+		fmt.Fprintf(w, "Hello, World!")
 	})
 	mux.HandleFunc("POST /users/create", func(w http.ResponseWriter, r *http.Request) {
 		handlers.CreateUserHandler(queries, w, r)
@@ -25,12 +25,15 @@ func NewRouter(queries *db.Queries) *http.ServeMux {
 	mux.HandleFunc("GET /users/{id}", func(w http.ResponseWriter, r *http.Request) {
 		handlers.GetUserByIDHandler(queries, w, r)
 	})
-	
+
 	mux.HandleFunc("POST /users/login", func(w http.ResponseWriter, r *http.Request) {
 		handlers.LoginHandler(queries, w, r)
 	})
 
-	// TODO: Add a GET /users/login route to show the login form
+	// TODO: Add a GET /login route to show the login form
+	mux.HandleFunc("GET /login", func(w http.ResponseWriter, r *http.Request) {
+		handlers.LoginPageHandler(w, r)
+	})
 
 	return mux
 }

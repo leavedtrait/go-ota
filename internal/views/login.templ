@@ -1,128 +1,164 @@
 package views
 
+import (
+	"github.com/axzilla/templui/component/button"
+	"github.com/axzilla/templui/component/form"
+	"github.com/axzilla/templui/component/input"
+	"github.com/axzilla/templui/component/spinner"
+	"bytes"
+	"context"
+)
+
+type BufferWriter struct{
+    buf *bytes.Buffer
+}
+
+func (w *BufferWriter) Write(p []byte) (n int, err error) {
+    return w.buf.Write(p)
+}
+
+func renderComponents(c templ.Component)string{
+    w := &BufferWriter{buf: bytes.NewBuffer(nil)}
+    err := c.Render(context.Background(), w)
+    if err != nil{
+        return ""//You fucked up
+    }
+    return w.buf.String()
+}
+
+var(
+    PrimaryButtonHTML = renderComponents(ButtonPrimary())
+    LoadingButtonHTML = renderComponents(ButtonLoading())
+)
+
 templ LoginPage(errMsg string) {
-    <html lang="en">
-        <head>
-            <meta charset="UTF-8"/>
-            <title>Login</title>
-            <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
-        </head>
-        <body class="flex items-center justify-center min-h-screen bg-gray-100">
-            <div class="w-full max-w-sm p-6 bg-white rounded-lg shadow-md">
-                <h2 class="mb-4 text-2xl font-semibold text-center text-gray-800">Login</h2>
-                if errMsg != "" {
-                    <div
-                        id="error-box"
-                        class="mb-4 text-sm text-red-600 bg-red-100 border border-red-400 p-2 rounded"
-                    >
-                        { errMsg }
-                    </div>
-                } else {
-                    <div
-                        id="error-box"
-                        class="hidden mb-4 text-sm text-red-600 bg-red-100 border border-red-400 p-2 rounded"
-                    ></div>
-                }
-                @LoginForm()
-            </div>
-        </body>
-    </html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<title>Login</title>
+			<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+		</head>
+		<body class="flex items-center justify-center min-h-screen bg-gray-100">
+			<div class="w-full max-w-sm p-6 bg-white rounded-lg shadow-md">
+				<h2 class="mb-4 text-2xl font-semibold text-center text-gray-800">Login</h2>
+				if errMsg != "" {
+					<div
+						id="error-box"
+						class="mb-4 text-sm text-red-600 bg-red-100 border border-red-400 p-2 rounded"
+					>
+						{ errMsg }
+					</div>
+				} else {
+					<div
+						id="error-box"
+						class="hidden mb-4 text-sm text-red-600 bg-red-100 border border-red-400 p-2 rounded"
+					></div>
+				}
+				@LoginForm()
+			</div>
+		</body>
+	</html>
 }
 
 templ LoginForm() {
-    <form id="login-form" class="space-y-4">
-        <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-            <input
-                type="email"
-                id="email"
-                name="email"
-                required
-                class="w-full px-3 py-2 mt-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-        </div>
-        <div>
-            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-            <input
-                type="password"
-                id="password"
-                name="password"
-                required
-                class="w-full px-3 py-2 mt-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-        </div>
-        <div>
-            <button
-                type="submit"
-                id="login-button"
-                class="w-full px-3 py-2 font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600"
-            >
-                <span id="login-button-text">Login</span>
-                <svg
-                    id="login-spinner"
-                    class="w-5 h-5 ml-2 animate-spin hidden text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                >
-                    <circle
-                        class="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        stroke-width="4"
-                    ></circle>
-                    <path
-                        class="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                    ></path>
-                </svg>
-            </button>
-        </div>
-    </form>
-    <script>
-        document.getElementById("login-form").addEventListener("submit", async function (e) {
-            e.preventDefault();
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
+	<div class="w-full max-w-sm">
+		<form id="login-form" class="space-y-4">
+            @InputForm()
+			<div id="error-box" class="hidden text-red-600 text-sm bg-red-100 border border-red-400 p-2 rounded"></div>
+			<div id="button-container">
+				@ButtonPrimary()
+			</div>
+		</form>
+		<script>
+			document.getElementById("login-form").addEventListener("submit", async function (e) {
+				e.preventDefault();
+				const email = document.getElementById("email").value;
+				const password = document.getElementById("password").value;
+				const errorBox = document.getElementById("error-box");
+				const buttonContainer = document.getElementById("button-container");
 
-            const loginButton = document.getElementById("login-button");
-            const loginButtonText = document.getElementById("login-button-text");
-            const loginSpinner = document.getElementById("login-spinner");
-            const errorBox = document.getElementById("error-box");
+				// Replace button with loading state
+				buttonContainer.innerHTML = {{ LoadingButtonHTML }};
 
-            // Show spinner, disable button
-            loginButtonText.textContent = "Logging in...";
-            loginSpinner.classList.remove("hidden");
-            loginButton.disabled = true;
+				errorBox.classList.add("hidden");
 
-            const response = await fetch("/users/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ email, password })
-            });
+				try {
+					const response = await fetch("/users/login", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify({ email, password })
+					});
+					
+					const result = await response.json();
 
-            const result = await response.json();
-
-            // Hide spinner, re-enable button
-            loginButtonText.textContent = "Login";
-            loginSpinner.classList.add("hidden");
-            loginButton.disabled = false;
-
-            if (response.ok) {
-                window.location.href = "/";
-            } else {
-                if (errorBox) {
-                    errorBox.classList.remove('hidden');
-                    errorBox.textContent = result.error || "Login failed.";
-                } else {
-                    alert(result.error || "Login failed.");
-                }
-            }
-        });
-    </script>
+					if (response.ok) {
+						window.location.href = "/";
+					} else {
+						throw new Error(result.error || "Login failed.");
+					}
+				} catch (err) {
+					// Restore original button and show error
+					buttonContainer.innerHTML = {{ PrimaryButtonHTML }};
+					errorBox.textContent = err.message;
+					errorBox.classList.remove("hidden");
+				}
+			});
+		</script>
+	</div>
 }
+
+templ InputForm() {
+	@form.Item() {
+		@form.Label(form.LabelProps{For: "email"}) {
+			Email
+		}
+		@input.Input(input.Props{
+			ID:          "email",
+			Type:        input.TypeEmail,
+			Name:        "email",
+			Placeholder: "m@example.com",
+			Required:    true,
+		})
+	}
+	@form.Item() {
+		@form.Label(form.LabelProps{For: "password"}) {
+			Password
+		}
+		@input.Input(input.Props{
+			ID:          "password",
+			Type:        input.TypePassword,
+			Name:        "password",
+			Placeholder: "••••••••",
+			Required:    true,
+		})
+	}
+}
+
+templ ButtonPrimary() {
+	@button.Button(button.Props{
+		ID:      "login-button",
+		Class:   "w-full px-3 py-2 font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600",
+		Type:    button.TypeSubmit,
+		Variant: button.VariantDefault,
+	}) {
+		Login
+	}
+}
+
+templ ButtonLoading() {
+	@button.Button(button.Props{
+		Disabled: true,
+		Class:    "w-full px-3 py-2 font-semibold text-white bg-gray-500 gap-2 flex items-center justify-center cursor-not-allowed",
+	}) {
+		@spinner.Spinner(spinner.Props{
+			Size:  spinner.SizeSm,      
+			Color: "text-white",
+            Class: "animate-spin transition duration-500 ease-in-out",
+
+		})
+		Please wait
+	}
+}
+//templ InitClientSideScript(){}
